@@ -5,7 +5,7 @@ part 'database.g.dart';
 @HiveType(typeId: 1)
 class Categories extends HiveObject {
   @HiveField(0)
-  final String category;
+  late final String category;
 
   @HiveField(1)
   final bool type;
@@ -28,4 +28,19 @@ class Transactions extends HiveObject {
       {required this.amount,
       required this.categoryType,
       required this.dateTime});
+}
+
+@HiveType(typeId: 3)
+class ReminderDb extends HiveObject {
+  @HiveField(0)
+  final String title;
+
+  @HiveField(1)
+  final double amount;
+
+  @HiveField(2)
+  final DateTime dateTime;
+
+  ReminderDb(
+      {required this.title, required this.amount, required this.dateTime});
 }

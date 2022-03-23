@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/screens/categories/screen_income_categories.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 
 class IncomeScreen extends StatefulWidget {
-  const IncomeScreen({Key? key}) : super(key: key);
+  int? currentKey;
+  IncomeScreen({Key? key, this.currentKey}) : super(key: key);
 
   @override
   State<IncomeScreen> createState() => _IncomeScreenState();
@@ -12,14 +16,26 @@ class IncomeScreen extends StatefulWidget {
 
 class _IncomeScreenState extends State<IncomeScreen> {
   final formKey = GlobalKey<FormState>();
-  var selectedCategory;
-  final amountController = TextEditingController();
-  final newDate = DateTime.now();
+  Categories? selectedCategory;
+  TextEditingController amountController = TextEditingController();
+  // final newDate = DateTime.now();
+  late Box<Categories> categories;
+  late Box<Transactions> transactions;
+  bool redCol = false;
+  DateTime? date;
   // ExpenseCategories? selectedVal;
   // String name = '';
 
   @override
   void initState() {
+    categories = Hive.box<Categories>(categoryBox);
+    transactions = Hive.box<Transactions>(transactionBox);
+    amountController.text = widget.currentKey != null
+        ? transactions.get(widget.currentKey)!.amount.toString()
+        : "";
+    date = widget.currentKey != null
+        ? transactions.get(widget.currentKey)!.dateTime
+        : date;
     super.initState();
   }
 
@@ -27,9 +43,12 @@ class _IncomeScreenState extends State<IncomeScreen> {
   Widget build(BuildContext context) {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Income'),
+        title: widget.currentKey == null
+            ? const Text('Income')
+            : const Text('Edit Income'),
         centerTitle: true,
         backgroundColor: greenTheme,
       ),
@@ -39,7 +58,9 @@ class _IncomeScreenState extends State<IncomeScreen> {
             CustomSubHead(text: 'Amount'),
             Form(
               key: formKey,
-              child: CustomTextField(),
+              child: CustomTextField(
+                controller: amountController,
+              ),
             ),
             Padding(
               padding: EdgeInsets.only(top: mediaQueryHeight * 0.02),
@@ -48,24 +69,33 @@ class _IncomeScreenState extends State<IncomeScreen> {
             Padding(
               padding: EdgeInsets.only(
                   left: mediaQueryWidth * 0.045, right: mediaQueryWidth * 0.5),
-              child: DropdownButton<dynamic>(
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
-                isExpanded: true,
-                value: selectedCategory,
-                borderRadius: BorderRadius.circular(10),
-                iconEnabledColor: greenTheme,
-                hint: const Text('Select Category'),
-                items:
-                    <String>['one', 'two', 'three', 'four'].map((String val) {
-                  return DropdownMenuItem<dynamic>(
-                    value: val,
-                    child: Text(val),
+              child: ValueListenableBuilder(
+                valueListenable: categories.listenable(),
+                builder: (context, Box<Categories> categoryList, _) {
+                  return DropdownButton<dynamic>(
+                    onChanged: (value) {
+                      setState(() {
+                        selectedCategory = value;
+                      });
+                    },
+                    isExpanded: true,
+                    value: selectedCategory,
+                    borderRadius: BorderRadius.circular(10),
+                    iconEnabledColor: greenTheme,
+                    hint: const Text('Select Category'),
+                    items: type(categoryList.values.toList())[0].map(
+                      (Categories e) {
+                        return DropdownMenuItem(
+                          child: Text(e.category),
+                          value: e,
+                          onTap: () {
+                            selectedCategory = e;
+                          },
+                        );
+                      },
+                    ).toList(),
                   );
-                }).toList(),
+                },
               ),
             ),
             Padding(
@@ -74,12 +104,12 @@ class _IncomeScreenState extends State<IncomeScreen> {
                 children: [
                   TextButton(
                     style: ButtonStyle(
-                        shadowColor: MaterialStateProperty.all(redTheme)),
+                        shadowColor: MaterialStateProperty.all(greenTheme)),
                     onPressed: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => IncomeCategory()));
+                              builder: (context) => const IncomeCategory()));
                     },
                     child: Text(
                       'Add Category',
@@ -90,7 +120,53 @@ class _IncomeScreenState extends State<IncomeScreen> {
               ),
             ),
             CustomSubHead(text: 'Date'),
-            CustomDatePicker(redCol: false, date: newDate),
+            Container(
+              height: mediaQueryHeight * 0.04,
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      DateTime? newDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                      );
+                      if (newDate == null) return;
+                      setState(() => date = newDate);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.only(left: mediaQueryWidth * 0.043),
+                      child: Row(
+                        children: [
+                          Text(
+                            DateFormat('dd/MM/yyyy')
+                                .format(date ?? DateTime.now()),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  HorizontalSpace(width: mediaQueryWidth * 0.552),
+                  IconButton(
+                    onPressed: () async {
+                      DateTime? newDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                      );
+                      if (newDate == null) return;
+                      setState(() => date = newDate);
+                    },
+                    icon: Icon(
+                      Icons.date_range,
+                      color: redCol ? redTheme : greenTheme,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Divider(
               height: mediaQueryHeight * 0.03,
               thickness: 1,
@@ -100,8 +176,25 @@ class _IncomeScreenState extends State<IncomeScreen> {
             ),
             VerticalSpace(height: mediaQueryHeight * 0.37),
             CustomElevatedButtonIncome(
-              text: 'Add Expense',
-              onPressed: () {},
+              text: widget.currentKey == null ? 'Add Income' : 'Update Income',
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  final parseAmont = double.tryParse(amountController.text);
+                  if (selectedCategory == null) {
+                    return;
+                  }
+                  date ??= DateTime.now();
+                  Transactions newTransaction = Transactions(
+                      amount: parseAmont!,
+                      categoryType: selectedCategory!,
+                      dateTime: date!);
+                  widget.currentKey == null
+                      ? transactions.add(newTransaction)
+                      : transactions.put(widget.currentKey, newTransaction);
+                  // print(newTransaction);
+                  Navigator.pop(context);
+                }
+              },
             ),
           ],
         ),

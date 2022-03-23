@@ -4,6 +4,20 @@ import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 
+List<List<Categories>> type(List<Categories> list) {
+  List<Categories> incomeList = [];
+  List<Categories> expenseList = [];
+  List<List<Categories>> categoriesList = [incomeList, expenseList];
+  for (int i = 0; i < list.length; i++) {
+    if (list[i].type == true) {
+      incomeList.add(list[i]);
+    } else {
+      expenseList.add(list[i]);
+    }
+  }
+  return categoriesList;
+}
+
 class IncomeCategory extends StatefulWidget {
   const IncomeCategory({Key? key}) : super(key: key);
 
@@ -21,8 +35,8 @@ class _IncomeCategoryState extends State<IncomeCategory> {
 
   @override
   Widget build(BuildContext context) {
-    double mediaQueryHeight = MediaQuery.of(context).size.height;
-    // double mediaQueryWidth = MediaQuery.of(context).size.width;
+    // double mediaQueryHeight = MediaQuery.of(context).size.height;
+    double mediaQueryWidth = MediaQuery.of(context).size.width;
     // List<ExpenseCategories> category = box.values.toList();
     return Scaffold(
       appBar: AppBar(
@@ -30,65 +44,93 @@ class _IncomeCategoryState extends State<IncomeCategory> {
         title: const Text('Income Category'),
         centerTitle: true,
       ),
-      body: ListView.separated(
-          // physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text('jaba'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Colors.blue,
-                    ),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Warning!',
-                                style: TextStyle(color: redTheme)),
-                            content: const Text('Do you want to delete?'),
-                            actions: [
-                              TextButton(
-                                  child: const Text(
-                                    'Yes',
-                                    style: TextStyle(color: Colors.black),
+      body: ValueListenableBuilder(
+          valueListenable: categories.listenable(),
+          builder: (context, Box<Categories> categoriesVal, _) {
+            List<Categories> categoriesList =
+                type(categoriesVal.values.toList())[0];
+            return categoriesList.isEmpty
+                ? const Center(
+                    child: Text('Add some Categories'),
+                  )
+                : ListView.separated(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                            left: mediaQueryWidth * 0.01,
+                            right: mediaQueryWidth * 0.01),
+                        child: Card(
+                          child: ListTile(
+                            title: Text(categoriesList[index].category),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
                                   ),
                                   onPressed: () {
-                                    Navigator.pop(context);
-                                  }),
-                              TextButton(
-                                child: const Text(
-                                  'NO',
-                                  style: TextStyle(color: Colors.black),
+                                    categoryAddPopup(
+                                        context, categoriesList[index].key);
+                                  },
                                 ),
-                                onPressed: () => Navigator.pop(context),
-                              )
-                            ],
-                          );
-                        },
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text('Warning!',
+                                              style:
+                                                  TextStyle(color: redTheme)),
+                                          content: const Text(
+                                              'Do you want to delete?'),
+                                          actions: [
+                                            TextButton(
+                                                child: const Text(
+                                                  'Yes',
+                                                  style: TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                                onPressed: () {
+                                                  categories.delete(
+                                                      categoriesList[index]
+                                                          .key);
+                                                  Navigator.pop(context);
+                                                }),
+                                            TextButton(
+                                              child: const Text(
+                                                'NO',
+                                                style: TextStyle(
+                                                    color: Colors.black),
+                                              ),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                            )
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
                     },
-                  ),
-                ],
-              ),
-            );
-          },
-          separatorBuilder: (ctx, index) {
-            return VerticalSpace(height: mediaQueryHeight * 0.01);
-          },
-          itemCount: 20),
+                    separatorBuilder: (ctx, index) {
+                      return const SizedBox.shrink();
+                    },
+                    itemCount: categoriesList.length);
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           categoryAddPopup(context, null);
@@ -104,6 +146,7 @@ class _IncomeCategoryState extends State<IncomeCategory> {
     double mediaQueryWidth = MediaQuery.of(context).size.width;
     final formKey = GlobalKey<FormState>();
     TextEditingController controller = TextEditingController();
+    controller.text = key != null ? categories.get(key)!.category : "";
 
     showDialog(
       context: context,
@@ -119,7 +162,7 @@ class _IncomeCategoryState extends State<IncomeCategory> {
               child: Form(
                 key: formKey,
                 child: TextFormField(
-                    cursorColor: redTheme,
+                    cursorColor: greenTheme,
                     controller: controller,
                     decoration: InputDecoration(
                         focusedBorder: OutlineInputBorder(
@@ -142,16 +185,27 @@ class _IncomeCategoryState extends State<IncomeCategory> {
               padding: EdgeInsets.only(
                   left: mediaQueryWidth * 0.2, right: mediaQueryWidth * 0.2),
               child: ElevatedButton(
-                style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all(
-                      Size(mediaQueryWidth * 0.05, mediaQueryHeight * 0.05),
-                    ),
-                    backgroundColor: MaterialStateProperty.all(redTheme)),
-                child: const Text('Add'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
+                  style: ButtonStyle(
+                      minimumSize: MaterialStateProperty.all(
+                        Size(mediaQueryWidth * 0.05, mediaQueryHeight * 0.05),
+                      ),
+                      backgroundColor: MaterialStateProperty.all(greenTheme)),
+                  child: key == null ? const Text('Add') : const Text('Update'),
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      if (controller.text != '') {
+                        Categories newCategory =
+                            Categories(category: controller.text, type: true);
+                        if (key == null) {
+                          categories.add(newCategory);
+                        } else {
+                          categories.put(key, newCategory);
+                        }
+                        // print(newCategory);
+                        Navigator.pop(context);
+                      }
+                    }
+                  }),
             )
           ],
         );

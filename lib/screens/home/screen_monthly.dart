@@ -29,7 +29,7 @@ class _MonthlyScreenState extends State<MonthlyScreen> {
           Padding(
             padding: EdgeInsets.only(top: mediaQueryHeight * 0.03),
             child: Container(
-              height: mediaQueryHeight * 0.3,
+              height: mediaQueryHeight * 0.33,
               width: double.maxFinite,
               child: SfCircularChart(
                 tooltipBehavior: TooltipBehavior(

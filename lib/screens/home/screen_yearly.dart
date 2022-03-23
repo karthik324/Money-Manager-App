@@ -26,7 +26,7 @@ class _YearlyScreenState extends State<YearlyScreen> {
       child: Column(
         children: [
           Container(
-            height: mediaQueryHeight * 0.3,
+            height: mediaQueryHeight * 0.33,
             width: double.maxFinite,
             child: Padding(
               padding: EdgeInsets.only(top: mediaQueryHeight * 0.03),

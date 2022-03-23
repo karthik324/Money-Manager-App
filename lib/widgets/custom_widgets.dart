@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager_app/main.dart';
 // import 'package:money_manager_app/screens/categories/categories_db.dart';
@@ -129,72 +128,94 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
-    return Container(
-      height: mediaQueryHeight * 0.25,
-      width: double.maxFinite,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                  left: mediaQueryWidth * 0.045, top: mediaQueryHeight * 0.01),
-              child: Row(
-                children: [
-                  Text(
-                    'Upcoming Payments',
-                    style: TextStyle(
-                        fontSize: customFontSizeTitle, fontWeight: bold),
-                  ),
-                ],
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+                left: mediaQueryWidth * 0.045, top: mediaQueryHeight * 0.01),
+            child: Row(
+              children: [
+                Text(
+                  'Upcoming Payments',
+                  style: TextStyle(
+                      fontSize: customFontSizeTitle, fontWeight: bold),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: redTheme,
+              radius: 20,
+              child: Text(
+                circleAvatarText,
+                style:
+                    const TextStyle(fontFamily: 'Prompt', color: Colors.white),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: mediaQueryWidth * 0.045, top: mediaQueryHeight * 0.015),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.brown,
-                    radius: 20,
-                    child: Text(
-                      circleAvatarText,
-                      style: const TextStyle(
-                          fontFamily: 'Prompt', color: Colors.white),
-                    ),
-                  ),
-                  HorizontalSpace(width: mediaQueryWidth * 0.02),
-                  Text(
-                    title,
-                    style: TextStyle(
-                        fontSize: customFontSizePara, fontWeight: bold),
-                  ),
-                ],
-              ),
+            title: Text(
+              title,
+              style: TextStyle(fontSize: customFontSizePara, fontWeight: bold),
             ),
-            Padding(
-              padding: EdgeInsets.only(left: mediaQueryWidth * 0.18),
-              child: Row(
-                children: [
-                  Text(
-                    'Due date - $dueDate',
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                  HorizontalSpace(width: mediaQueryWidth * 0.20),
-                  Text(
-                    '$payMent',
-                    style: TextStyle(color: redTheme),
-                  ),
-                ],
-              ),
+            subtitle: Text(
+              'Due date - $dueDate',
+              style: TextStyle(
+                  fontSize: 11, fontWeight: bold, color: Colors.black),
             ),
-            VerticalSpace(height: mediaQueryHeight * 0.02),
-            CustomElevatedButton(
+            trailing: Text(
+              '₹$payMent',
+              style: TextStyle(color: redTheme),
+            ),
+          ),
+          // Padding(
+          //   padding: EdgeInsets.only(
+          //       left: mediaQueryWidth * 0.045, top: mediaQueryHeight * 0.015),
+          //   child: Row(
+          //     children: [
+          //       CircleAvatar(
+          //         backgroundColor: Colors.brown,
+          //         radius: 20,
+          //         child: Text(
+          //           circleAvatarText,
+          //           style: const TextStyle(
+          //               fontFamily: 'Prompt', color: Colors.white),
+          //         ),
+          //       ),
+          //       HorizontalSpace(width: mediaQueryWidth * 0.02),
+          //       Text(
+          //         title,
+          //         style:
+          //             TextStyle(fontSize: customFontSizePara, fontWeight: bold),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // Row(
+          //   children: [
+          //     Text(
+          //       'Due date - $dueDate',
+          //       style: TextStyle(fontSize: 11, fontWeight: bold),
+          //     ),
+          //     // HorizontalSpace(width: mediaQueryWidth * 0.11),
+          //     Flexible(
+          //       child: Text(
+          //         '₹$payMent',
+          //         style: TextStyle(color: redTheme),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          VerticalSpace(height: mediaQueryHeight * 0.01),
+          Padding(
+            padding: EdgeInsets.only(bottom: mediaQueryHeight * 0.01),
+            child: CustomElevatedButton(
               text: 'Notify Me',
               onPressed: () {},
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -226,12 +247,14 @@ class CustomElevatedButtonRed extends StatelessWidget {
 }
 
 class CustomTextField extends StatelessWidget {
-  const CustomTextField({Key? key}) : super(key: key);
+  TextEditingController? controller = TextEditingController();
+  CustomTextField({Key? key, this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
+
     return Padding(
       padding: EdgeInsets.only(
           left: mediaQueryWidth * 0.04, right: mediaQueryWidth * 0.04),
@@ -242,6 +265,7 @@ class CustomTextField extends StatelessWidget {
           }
         },
         keyboardType: TextInputType.number,
+        controller: controller,
         // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: InputDecoration(
             suffixIcon: Icon(
@@ -312,65 +336,29 @@ class _CategoryItemsState extends State<CategoryItems> {
   }
 }
 
-class CustomDatePicker extends StatefulWidget {
-  bool redCol = false;
-  DateTime date = DateTime.now();
-  CustomDatePicker({Key? key, required this.redCol, required this.date})
-      : super(key: key);
+// class CustomDatePicker extends StatefulWidget {
+//   bool redCol = false;
+//   DateTime? date;
+//   CustomDatePicker({Key? key, required this.redCol, required this.date})
+//       : super(key: key);
 
-  @override
-  State<CustomDatePicker> createState() => _CustomDatePickerState();
-}
+//   @override
+//   State<CustomDatePicker> createState() => _CustomDatePickerState();
+// }
 
-class _CustomDatePickerState extends State<CustomDatePicker> {
-  @override
-  Widget build(BuildContext context) {
-    double mediaQueryHeight = MediaQuery.of(context).size.height;
-    double mediaQueryWidth = MediaQuery.of(context).size.width;
+// class _CustomDatePickerState extends State<CustomDatePicker> {
+//   @override
+//   Widget build(BuildContext context) {
+//     double mediaQueryHeight = MediaQuery.of(context).size.height;
+//     double mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    return Padding(
-      padding: EdgeInsets.only(
-          left: mediaQueryWidth * 0.042, right: mediaQueryWidth * 0.04),
-      child: Container(
-        height: mediaQueryHeight * 0.04,
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: () async {
-                DateTime? newDate = await showDatePicker(
-                    context: context,
-                    initialDate: widget.date,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030));
-                if (newDate == null) return;
-                setState(() => widget.date = newDate);
-              },
-              child: Text(
-                DateFormat('dd/MM/yyyy').format(widget.date),
-              ),
-            ),
-            HorizontalSpace(width: mediaQueryWidth * 0.552),
-            IconButton(
-                onPressed: () async {
-                  DateTime? newDate = await showDatePicker(
-                    context: context,
-                    initialDate: widget.date,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                  );
-                  if (newDate == null) return;
-                  setState(() => widget.date = newDate);
-                },
-                icon: Icon(
-                  Icons.date_range,
-                  color: widget.redCol ? redTheme : greenTheme,
-                ))
-          ],
-        ),
-      ),
-    );
-  }
-}
+//     return Padding(
+//       padding: EdgeInsets.only(
+//           left: mediaQueryWidth * 0.042, right: mediaQueryWidth * 0.04),
+//       child:
+//     );
+//   }
+// }
 
 class CustomElevatedButtonIncome extends StatelessWidget {
   CustomElevatedButtonIncome({Key? key, required this.text, this.onPressed})
@@ -548,10 +536,12 @@ class CustomTransactionCard extends StatelessWidget {
   String date;
   String category;
   String amount;
+  Color color;
   CustomTransactionCard(
       {Key? key,
       required this.amount,
       required this.category,
+      required this.color,
       required this.date})
       : super(key: key);
 
@@ -565,18 +555,24 @@ class CustomTransactionCard extends StatelessWidget {
       child: Card(
         child: Center(
           child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: redTheme,
-              child: Text(
-                date,
-                style: TextStyle(fontSize: 10, color: Colors.white),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(20.0), //or 15.0
+              child: Container(
+                height: mediaQueryHeight * 0.7,
+                width: mediaQueryWidth * 0.32,
+                color: color,
+                child: Center(
+                  child: Text(
+                    date,
+                    style: const TextStyle(fontSize: 11, color: Colors.white),
+                  ),
+                ),
               ),
-              radius: 40,
             ),
             title: Text(category),
             trailing: Text(
               amount,
-              style: TextStyle(color: redTheme),
+              style: TextStyle(color: color),
             ),
           ),
         ),

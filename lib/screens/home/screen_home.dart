@@ -34,17 +34,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         centerTitle: true,
         actions: [
           Padding(
-              padding: EdgeInsets.only(right: mediaQueryWidth * 0.005),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()));
-                },
-                icon: Icon(Icons.settings),
-              )),
+            padding: EdgeInsets.only(right: mediaQueryWidth * 0.005),
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const SettingsScreen()));
+              },
+              icon: const Icon(Icons.settings),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
+        // physics: NeverScrollableScrollPhysics(),
         // primary: false,
         child: Column(
           children: [
@@ -102,25 +104,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         animationSpeed: 100,
         children: [
           SpeedDialChild(
-              label: 'Add Income ',
-              labelBackgroundColor: greenTheme,
-              labelStyle: const TextStyle(color: Colors.white),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const IncomeScreen()))),
+            label: 'Add Income ',
+            labelBackgroundColor: greenTheme,
+            labelStyle: const TextStyle(color: Colors.white),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => IncomeScreen(),
+              ),
+            ),
+          ),
           SpeedDialChild(
-              label: 'Add Expense',
-              labelBackgroundColor: redTheme,
-              labelStyle: const TextStyle(color: Colors.white),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const ExpenseScreen()))),
+            label: 'Add Expense',
+            labelBackgroundColor: redTheme,
+            labelStyle: const TextStyle(color: Colors.white),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ExpenseScreen(),
+              ),
+            ),
+          ),
           SpeedDialChild(
-              label: 'Set Reminder',
-              labelBackgroundColor: redTheme,
-              labelStyle: const TextStyle(color: Colors.white),
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SetReminderScreen())))
+            label: 'Set Reminder',
+            labelBackgroundColor: redTheme,
+            labelStyle: const TextStyle(color: Colors.white),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SetReminderScreen(),
+              ),
+            ),
+          )
         ],
       ),
     );
