@@ -1,6 +1,6 @@
 # money_manager_app
 
-A new Flutter project.
+My first fully functional Money Manager App with local database Hive.
 
 ## Getting Started
 
