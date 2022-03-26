@@ -122,3 +122,37 @@ class ReminderDbAdapter extends TypeAdapter<ReminderDb> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class UserNameAdapter extends TypeAdapter<UserName> {
+  @override
+  final int typeId = 4;
+
+  @override
+  UserName read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return UserName(
+      fields[0] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, UserName obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.userName);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserNameAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

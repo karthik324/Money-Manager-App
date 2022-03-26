@@ -5,6 +5,7 @@ import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 
+// ignore: must_be_immutable
 class SetReminderScreen extends StatefulWidget {
   int? currentKey;
   SetReminderScreen({Key? key, this.currentKey}) : super(key: key);
@@ -96,7 +97,7 @@ class _SetReminderScreenState extends State<SetReminderScreen> {
               VerticalSpace(height: mediaQueryHeight * 0.02),
               CustomSubHead(text: 'Due Date'),
               VerticalSpace(height: mediaQueryHeight * 0.02),
-              Container(
+              SizedBox(
                 height: mediaQueryHeight * 0.04,
                 child: Row(
                   children: [
@@ -182,7 +183,7 @@ class _SetReminderScreenState extends State<SetReminderScreen> {
                     widget.currentKey == null
                         ? reminder.add(newReminder)
                         : reminder.put(widget.currentKey, newReminder);
-                    // print(newReminder);
+
                     Navigator.pop(context);
                   }
                 },

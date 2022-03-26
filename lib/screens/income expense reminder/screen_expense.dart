@@ -7,6 +7,7 @@ import 'package:money_manager_app/screens/categories/screen_expense_categories.d
 import 'package:money_manager_app/screens/categories/screen_income_categories.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 
+// ignore: must_be_immutable
 class ExpenseScreen extends StatefulWidget {
   int? currentKey;
   ExpenseScreen({Key? key, this.currentKey}) : super(key: key);
@@ -19,13 +20,10 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
   final formKey = GlobalKey<FormState>();
   Categories? selectedCategory;
   TextEditingController amountController = TextEditingController();
-  // final newDate = DateTime.now();
   late Box<Categories> categories;
   late Box<Transactions> transactions;
   bool redCol = true;
   DateTime? date;
-  // ExpenseCategories? selectedVal;
-  // String name = '';
 
   @override
   void initState() {
@@ -37,9 +35,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     date = widget.currentKey != null
         ? transactions.get(widget.currentKey)!.dateTime
         : date;
-    selectedCategory = widget.currentKey != null
-        ? transactions.get(widget.currentKey)!.categoryType
-        : selectedCategory;
     super.initState();
   }
 
@@ -47,7 +42,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
   Widget build(BuildContext context) {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
-    // final catList = categories.values.toList();
+
     return Scaffold(
       appBar: AppBar(
         title: widget.currentKey == null
@@ -124,7 +119,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               ),
             ),
             CustomSubHead(text: 'Date'),
-            Container(
+            SizedBox(
               height: mediaQueryHeight * 0.04,
               child: Row(
                 children: [
@@ -143,9 +138,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                           )),
                         ),
                       );
-                      if (newDate == null) {
-                        date = DateTime.now();
-                      }
+                      if (newDate == null) return;
                       setState(() => date = newDate);
                     },
                     child: Padding(
@@ -214,7 +207,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                   widget.currentKey == null
                       ? transactions.add(newTransaction)
                       : transactions.put(widget.currentKey, newTransaction);
-                  // print(newTransaction);
+
                   Navigator.pop(context);
                 }
               },

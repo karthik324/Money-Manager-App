@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/screens/home/screen_home.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -15,16 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   String finalName = '';
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  setValidationData() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('name', nameController.text);
-    // print(finalName);
-  }
+  Box<UserName> userBox = Hive.box<UserName>(loginBox);
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +56,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   key: formKey,
                   child: CustomInputField(
                     controller: nameController,
+                    onChanged: (value) {
+                      finalName = value;
+                    },
                   ),
                 ),
               ],
@@ -74,14 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async {
                 if (formKey.currentState!.validate() &&
                     nameController.text != '') {
-                  setValidationData();
-                  // print(nameController.text);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    ),
-                  );
+                  UserName newUser = UserName(finalName);
+                  userBox.add(newUser);
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      (route) => false);
                 }
               },
             )

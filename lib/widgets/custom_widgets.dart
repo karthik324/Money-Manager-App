@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
-// import 'package:money_manager_app/screens/categories/categories_db.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+Box<UserName> userBox = Hive.box<UserName>(loginBox);
+
+// ignore: must_be_immutable
 class VerticalSpace extends StatelessWidget {
   double height;
   VerticalSpace({Key? key, required this.height}) : super(key: key);
@@ -15,6 +19,7 @@ class VerticalSpace extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class HorizontalSpace extends StatelessWidget {
   double width;
   HorizontalSpace({Key? key, required this.width}) : super(key: key);
@@ -27,6 +32,7 @@ class HorizontalSpace extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomElevatedButton extends StatelessWidget {
   CustomElevatedButton({Key? key, required this.text, this.onPressed})
       : super(key: key);
@@ -52,18 +58,22 @@ class CustomElevatedButton extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomInputField extends StatelessWidget {
   TextEditingController? controller;
-  CustomInputField({Key? key, this.controller}) : super(key: key);
+  Function(String)? onChanged;
+  CustomInputField({Key? key, this.controller, this.onChanged})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
-    TextEditingController? nameController = TextEditingController();
     return Padding(
       padding: EdgeInsets.only(
           left: mediaQueryHeight * 0.02, right: mediaQueryHeight * 0.02),
       child: TextFormField(
+          keyboardType: TextInputType.name,
+          onChanged: onChanged,
           controller: controller,
           decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
@@ -78,6 +88,7 @@ class CustomInputField extends StatelessWidget {
                 !RegExp(r'^[a-zA-Z][a-z A-Z]+$').hasMatch(value)) {
               return "Enter correct name";
             }
+            return null;
           }),
     );
   }
@@ -96,7 +107,6 @@ class CustomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double mediaQueryWidth = MediaQuery.of(context).size.width;
     return ListTile(
       title: Text(
         title,
@@ -111,6 +121,7 @@ class CustomListTile extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomCard extends StatelessWidget {
   String circleAvatarText;
   String dueDate;
@@ -169,58 +180,13 @@ class CustomCard extends StatelessWidget {
               style: TextStyle(color: redTheme),
             ),
           ),
-          // Padding(
-          //   padding: EdgeInsets.only(
-          //       left: mediaQueryWidth * 0.045, top: mediaQueryHeight * 0.015),
-          //   child: Row(
-          //     children: [
-          //       CircleAvatar(
-          //         backgroundColor: Colors.brown,
-          //         radius: 20,
-          //         child: Text(
-          //           circleAvatarText,
-          //           style: const TextStyle(
-          //               fontFamily: 'Prompt', color: Colors.white),
-          //         ),
-          //       ),
-          //       HorizontalSpace(width: mediaQueryWidth * 0.02),
-          //       Text(
-          //         title,
-          //         style:
-          //             TextStyle(fontSize: customFontSizePara, fontWeight: bold),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          // Row(
-          //   children: [
-          //     Text(
-          //       'Due date - $dueDate',
-          //       style: TextStyle(fontSize: 11, fontWeight: bold),
-          //     ),
-          //     // HorizontalSpace(width: mediaQueryWidth * 0.11),
-          //     Flexible(
-          //       child: Text(
-          //         '₹$payMent',
-          //         style: TextStyle(color: redTheme),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          VerticalSpace(height: mediaQueryHeight * 0.01),
-          Padding(
-            padding: EdgeInsets.only(bottom: mediaQueryHeight * 0.01),
-            child: CustomElevatedButton(
-              text: 'Notify Me',
-              onPressed: () {},
-            ),
-          ),
         ],
       ),
     );
   }
 }
 
+// ignore: must_be_immutable
 class CustomElevatedButtonRed extends StatelessWidget {
   CustomElevatedButtonRed({Key? key, required this.text, this.onPressed})
       : super(key: key);
@@ -246,13 +212,13 @@ class CustomElevatedButtonRed extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomTextField extends StatelessWidget {
   TextEditingController? controller = TextEditingController();
   CustomTextField({Key? key, this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
 
     return Padding(
@@ -260,17 +226,18 @@ class CustomTextField extends StatelessWidget {
           left: mediaQueryWidth * 0.04, right: mediaQueryWidth * 0.04),
       child: TextFormField(
         validator: (value) {
-          if (value!.isEmpty || value == null || value == '') {
+          if (value!.isEmpty || value == '') {
             return 'Enter the amount';
           }
+          return null;
         },
         keyboardType: TextInputType.number,
         controller: controller,
-        // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: InputDecoration(
-            suffixIcon: Icon(
-              Icons.monetization_on,
+            suffixIcon: FaIcon(
+              FontAwesomeIcons.indianRupeeSign,
               color: greenTheme,
+              size: 20,
             ),
             enabledBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.black)),
@@ -283,7 +250,7 @@ class CustomTextField extends StatelessWidget {
 
 class CustomSubHead extends StatelessWidget {
   final String text;
-  CustomSubHead({Key? key, required this.text}) : super(key: key);
+  const CustomSubHead({Key? key, required this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -336,30 +303,7 @@ class _CategoryItemsState extends State<CategoryItems> {
   }
 }
 
-// class CustomDatePicker extends StatefulWidget {
-//   bool redCol = false;
-//   DateTime? date;
-//   CustomDatePicker({Key? key, required this.redCol, required this.date})
-//       : super(key: key);
-
-//   @override
-//   State<CustomDatePicker> createState() => _CustomDatePickerState();
-// }
-
-// class _CustomDatePickerState extends State<CustomDatePicker> {
-//   @override
-//   Widget build(BuildContext context) {
-//     double mediaQueryHeight = MediaQuery.of(context).size.height;
-//     double mediaQueryWidth = MediaQuery.of(context).size.width;
-
-//     return Padding(
-//       padding: EdgeInsets.only(
-//           left: mediaQueryWidth * 0.042, right: mediaQueryWidth * 0.04),
-//       child:
-//     );
-//   }
-// }
-
+// ignore: must_be_immutable
 class CustomElevatedButtonIncome extends StatelessWidget {
   CustomElevatedButtonIncome({Key? key, required this.text, this.onPressed})
       : super(key: key);
@@ -385,6 +329,7 @@ class CustomElevatedButtonIncome extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomElevatedButtonExpense extends StatelessWidget {
   CustomElevatedButtonExpense({Key? key, required this.text, this.onPressed})
       : super(key: key);
@@ -410,34 +355,35 @@ class CustomElevatedButtonExpense extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomTextFieldExpense extends StatelessWidget {
   TextEditingController? controller = TextEditingController();
   CustomTextFieldExpense({Key? key, this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
-    int? amount;
     return Padding(
       padding: EdgeInsets.only(
-          left: mediaQueryWidth * 0.04, right: mediaQueryWidth * 0.04),
+        left: mediaQueryWidth * 0.04,
+        right: mediaQueryWidth * 0.04,
+      ),
       child: TextFormField(
         validator: (value) {
-          if (value!.isEmpty || value == null || value == '') {
+          if (value!.isEmpty || value == '') {
             return 'Enter the amount';
           }
+          return null;
         },
-        onChanged: (val) {
-          amount = int.parse(val);
-        },
+        onChanged: (val) {},
         cursorColor: redTheme,
         controller: controller,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-            suffixIcon: Icon(
-              Icons.monetization_on,
+            suffixIcon: FaIcon(
+              FontAwesomeIcons.indianRupeeSign,
               color: redTheme,
+              size: 20,
             ),
             enabledBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.black)),
@@ -450,7 +396,7 @@ class CustomTextFieldExpense extends StatelessWidget {
 
 class CustomSubHeadReminder extends StatelessWidget {
   final String text;
-  CustomSubHeadReminder({Key? key, required this.text}) : super(key: key);
+  const CustomSubHeadReminder({Key? key, required this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -473,65 +419,7 @@ class CustomSubHeadReminder extends StatelessWidget {
   }
 }
 
-class CustomDatePickerReminder extends StatefulWidget {
-  bool redCol = false;
-  CustomDatePickerReminder({Key? key, required this.redCol}) : super(key: key);
-
-  @override
-  State<CustomDatePickerReminder> createState() =>
-      _CustomDatePickerReminderState();
-}
-
-class _CustomDatePickerReminderState extends State<CustomDatePickerReminder> {
-  DateTime date = DateTime.now();
-  @override
-  Widget build(BuildContext context) {
-    double mediaQueryHeight = MediaQuery.of(context).size.height;
-    double mediaQueryWidth = MediaQuery.of(context).size.width;
-
-    return Padding(
-      padding: EdgeInsets.only(
-          left: mediaQueryWidth * 0.042, right: mediaQueryWidth * 0.04),
-      child: Container(
-        height: mediaQueryHeight * 0.04,
-        child: Row(
-          children: [
-            GestureDetector(
-                onTap: () async {
-                  DateTime? newDate = await showDatePicker(
-                      context: context,
-                      initialDate: date,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030));
-                  if (newDate == null) return;
-                  setState(() => date = newDate);
-                },
-                child: Text(
-                  DateFormat('dd/MM/yyyy').format(date),
-                )),
-            HorizontalSpace(width: mediaQueryWidth * 0.33),
-            IconButton(
-                onPressed: () async {
-                  DateTime? newDate = await showDatePicker(
-                    context: context,
-                    initialDate: date,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                  );
-                  if (newDate == null) return;
-                  setState(() => date = newDate);
-                },
-                icon: Icon(
-                  Icons.date_range,
-                  color: widget.redCol ? redTheme : greenTheme,
-                ))
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+// ignore: must_be_immutable
 class CustomTransactionCard extends StatelessWidget {
   String date;
   String category;
@@ -549,7 +437,7 @@ class CustomTransactionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     double mediaQueryWidth = MediaQuery.of(context).size.width;
     double mediaQueryHeight = MediaQuery.of(context).size.height;
-    return Container(
+    return SizedBox(
       width: double.maxFinite,
       height: mediaQueryHeight * 0.1,
       child: Card(
@@ -581,6 +469,7 @@ class CustomTransactionCard extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomTransactionCardIncome extends StatelessWidget {
   String date;
   String category;
@@ -594,9 +483,8 @@ class CustomTransactionCardIncome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double mediaQueryWidth = MediaQuery.of(context).size.width;
     double mediaQueryHeight = MediaQuery.of(context).size.height;
-    return Container(
+    return SizedBox(
       width: double.maxFinite,
       height: mediaQueryHeight * 0.1,
       child: Card(
@@ -606,7 +494,7 @@ class CustomTransactionCardIncome extends StatelessWidget {
               backgroundColor: greenTheme,
               child: Text(
                 date,
-                style: TextStyle(fontSize: 10, color: Colors.white),
+                style: const TextStyle(fontSize: 10, color: Colors.white),
               ),
               radius: 40,
             ),

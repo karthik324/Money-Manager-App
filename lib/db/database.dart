@@ -44,3 +44,13 @@ class ReminderDb extends HiveObject {
   ReminderDb(
       {required this.title, required this.amount, required this.dateTime});
 }
+
+
+
+@HiveType(typeId: 4)
+class UserName extends HiveObject{
+  @HiveField(0)
+  final String userName;
+
+  UserName(this.userName);
+}

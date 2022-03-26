@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
+import 'package:money_manager_app/screens/home/screen_daily.dart';
+import 'package:money_manager_app/screens/income%20expense%20reminder/screen_expense.dart';
+import 'package:money_manager_app/screens/income%20expense%20reminder/screen_income.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+List<Transactions> dateRange(
+    List<Transactions> list, DateTime startDate, DateTime endDate) {
+  List<Transactions> rangeList = [];
+  for (int i = 0; i < list.length; i++) {
+    if ((list[i].dateTime.day == startDate.day ||
+            list[i].dateTime.isAfter(startDate)) &&
+        (list[i].dateTime.day == endDate.day ||
+            list[i].dateTime.isBefore(endDate))) {
+      rangeList.add(list[i]);
+    }
+  }
+  return rangeList;
+}
 
 class CalanderScreen extends StatefulWidget {
   const CalanderScreen({Key? key}) : super(key: key);
@@ -12,14 +31,20 @@ class CalanderScreen extends StatefulWidget {
 }
 
 class _CalanderScreenState extends State<CalanderScreen> {
-  DateTimeRange dateRange = DateTimeRange(
-    start: DateTime.now(),
-    end: DateTime.now(),
-  );
-  late List<Data> _chartData;
+  late Box<Categories> categories;
+  late Box<Transactions> transactions;
+  Icon myIcon = const Icon(Icons.search);
+  Widget myField = const Text('All Transactions');
+  String searchInput = '';
+  double? totalIncome;
+  double? totalExpense;
+  DateTime startDate = DateTime.now();
+  DateTime endDate = DateTime.now();
+
   @override
   void initState() {
-    _chartData = getChartData();
+    categories = Hive.box<Categories>(categoryBox);
+    transactions = Hive.box<Transactions>(transactionBox);
     super.initState();
   }
 
@@ -27,279 +52,384 @@ class _CalanderScreenState extends State<CalanderScreen> {
   Widget build(BuildContext context) {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
-    final start = dateRange.start;
-    final end = dateRange.end;
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+      physics: const BouncingScrollPhysics(),
+      child: ValueListenableBuilder(
+        valueListenable: transactions.listenable(),
+        builder: (context, Box<Transactions> tra, _) {
+          List<Transactions> boxList =
+              dateRange(tra.values.toList(), startDate, endDate);
+          double incomeAmount = amountType(boxList)[0];
+          double expenseAmount = amountType(boxList)[1];
+          return Column(
             children: [
-              TextButton(
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(Colors.grey[200])),
-                  onPressed: () {
-                    pickDateRange();
-                  },
-                  child: Text(
-                    DateFormat('dd/MM/yyyy').format(start),
-                    style: const TextStyle(color: Colors.black),
-                  )),
-              TextButton(
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(Colors.grey[200])),
-                  onPressed: () {
-                    pickDateRange();
-                  },
-                  child: Text(
-                    DateFormat('dd/MM/yyyy').format(end),
-                    style: const TextStyle(color: Colors.black),
-                  ))
-            ],
-          ),
-          Container(
-            height: mediaQueryHeight * 0.33,
-            width: double.maxFinite,
-            child: Padding(
-              padding: EdgeInsets.only(top: mediaQueryHeight * 0.03),
-              child: SfCircularChart(
-                tooltipBehavior: TooltipBehavior(
-                    enable: true,
-                    textStyle: const TextStyle(
-                      fontFamily: 'Prompt',
-                    )),
-                palette: [greenTheme, redTheme, blueTheme],
-                legend: Legend(
-                    isVisible: true,
-                    position: LegendPosition.bottom,
-                    textStyle: const TextStyle(
-                      fontFamily: 'Prompt',
-                      fontSize: 13,
-                    )),
-                series: <CircularSeries>[
-                  DoughnutSeries<Data, String>(
-                      // startAngle: 100,
-                      // endAngle: 10,
-                      radius: '90',
-                      innerRadius: '60',
-                      dataSource: _chartData,
-                      xValueMapper: (Data data, _) => data.datas,
-                      yValueMapper: (Data data, _) => data.values,
-                      dataLabelSettings: const DataLabelSettings(
-                          labelPosition: ChartDataLabelPosition.outside,
-                          isVisible: true,
-                          textStyle: TextStyle(
-                            fontFamily: 'Prompt',
-                            fontSize: 11,
-                          )))
-                ],
-              ),
-            ),
-          ),
-          VerticalSpace(height: mediaQueryHeight * 0.04),
-          Column(
-            children: [
-              IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text('Income',
-                        style: TextStyle(
-                            fontWeight: bold, fontSize: customFontSizeTitle)),
-                    const VerticalDivider(
-                      thickness: 1,
-                      color: Colors.black,
-                    ),
-                    Text('Expenses',
-                        style: TextStyle(
-                            fontWeight: bold, fontSize: customFontSizeTitle)),
-                    const VerticalDivider(thickness: 1, color: Colors.black),
-                    Text('Balance',
-                        style: TextStyle(
-                            fontWeight: bold, fontSize: customFontSizeTitle)),
-                  ],
-                ),
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text('600000',
-                      style: TextStyle(
-                          fontWeight: bold,
-                          fontSize: customFontSizeTitle,
-                          color: greenTheme)),
-                  const VerticalDivider(
-                    thickness: 1,
-                    color: Colors.black,
+                  TextButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.grey[200]),
+                    ),
+                    onPressed: () async {
+                      DateTime? newDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                        builder: (context, child) => Theme(
+                          child: child!,
+                          data: ThemeData().copyWith(
+                              colorScheme: const ColorScheme.light(
+                            primary: Colors.green,
+                          )),
+                        ),
+                      );
+                      if (newDate == null) {
+                        startDate = DateTime.now();
+                      }
+                      setState(() => startDate = newDate!);
+                    },
+                    child: Text(
+                      DateFormat('dd/MM/yyyy').format(startDate),
+                      style: const TextStyle(color: Colors.black),
+                    ),
                   ),
-                  Text('200000',
-                      style: TextStyle(
-                          fontWeight: bold,
-                          fontSize: customFontSizeTitle,
-                          color: redTheme)),
-                  const VerticalDivider(thickness: 1, color: Colors.black),
-                  Text('400000',
-                      style: TextStyle(
-                          fontWeight: bold,
-                          fontSize: customFontSizeTitle,
-                          color: blueTheme)),
+                  TextButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.grey[200]),
+                    ),
+                    onPressed: () async {
+                      DateTime? newDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                        builder: (context, child) => Theme(
+                          child: child!,
+                          data: ThemeData().copyWith(
+                              colorScheme: const ColorScheme.light(
+                            primary: Colors.green,
+                          )),
+                        ),
+                      );
+                      if (newDate == null) {
+                        endDate = DateTime.now();
+                      }
+                      setState(() => endDate = newDate!);
+                    },
+                    child: Text(
+                      DateFormat('dd/MM/yyyy').format(endDate),
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  )
                 ],
               ),
-              VerticalSpace(height: mediaQueryHeight * 0.02),
-              Card(
-                margin: const EdgeInsets.all(5),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Theme(
-                  data: ThemeData(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    title: Text(
-                      'Income, Expenses details from ${DateFormat('dd/MM/yyyy').format(start)} to ${DateFormat('dd/MM/yyyy').format(end)}',
-                      style: const TextStyle(
-                          color: Colors.black, fontFamily: 'Prompt'),
-                    ),
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: mediaQueryHeight * 0.01,
-                            left: mediaQueryWidth * 0.025,
-                            right: mediaQueryWidth * 0.025),
-                        child: Row(
-                          children: [
-                            const Text('Selected Range'),
-                            HorizontalSpace(width: mediaQueryWidth * 0.1),
-                            Text(
-                              'Income',
-                              style: TextStyle(color: greenTheme),
+              boxList.isEmpty
+                  ? Padding(
+                      padding: EdgeInsets.only(top: mediaQueryHeight * 0.335),
+                      child: const Text('No Transactions'),
+                    )
+                  : Column(
+                      children: [
+                        SizedBox(
+                          height: mediaQueryHeight * 0.35,
+                          width: double.maxFinite,
+                          child: Padding(
+                            padding:
+                                EdgeInsets.only(top: mediaQueryHeight * 0.03),
+                            child: SfCircularChart(
+                              tooltipBehavior: TooltipBehavior(
+                                enable: true,
+                                textStyle: const TextStyle(
+                                  fontFamily: 'Prompt',
+                                ),
+                              ),
+                              palette: [redTheme, blueTheme],
+                              legend: Legend(
+                                isVisible: true,
+                                position: LegendPosition.bottom,
+                                textStyle: const TextStyle(
+                                  fontFamily: 'Prompt',
+                                  fontSize: 13,
+                                ),
+                              ),
+                              series: <CircularSeries>[
+                                DoughnutSeries<Data, String>(
+                                  radius: '90',
+                                  innerRadius: '60',
+                                  dataSource: getChartData(
+                                    expenseAmount,
+                                    ((incomeAmount) - (expenseAmount)),
+                                  ),
+                                  xValueMapper: (Data data, _) => data.datas,
+                                  yValueMapper: (Data data, _) => data.values,
+                                  dataLabelSettings: const DataLabelSettings(
+                                    labelPosition:
+                                        ChartDataLabelPosition.outside,
+                                    isVisible: true,
+                                    textStyle: TextStyle(
+                                      fontFamily: 'Prompt',
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            HorizontalSpace(width: mediaQueryWidth * 0.145),
-                            Text(
-                              'Expense',
-                              style: TextStyle(color: redTheme),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      const Divider(
-                        thickness: 1,
-                        color: Colors.black,
-                      ),
-                      Row(
-                        children: [
-                          HorizontalSpace(width: mediaQueryWidth * 0.41),
-                          Text(
-                            '600000',
-                            style: TextStyle(color: greenTheme),
-                          ),
-                          HorizontalSpace(width: mediaQueryWidth * 0.14),
-                          Text(
-                            '200000',
-                            style: TextStyle(color: redTheme),
-                          ),
-                        ],
-                      ),
-                      Card(
-                        child: Theme(
-                          data: ThemeData(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            title: Text(
-                              'Details',
-                              style: TextStyle(
-                                  color: Colors.black, fontFamily: 'Prompt'),
-                            ),
-                            children: [
-                              CustomListTile(
-                                  title: 'Shopping',
-                                  leading: Icon(
-                                    Icons.shopping_cart,
-                                    color: Colors.blue,
-                                  ),
-                                  value: '- 40000'),
-                              CustomListTile(
-                                  title: 'Food and Drinks',
-                                  leading: Icon(
-                                    Icons.local_restaurant_outlined,
-                                    color: Colors.red,
-                                  ),
-                                  value: '- 30000'),
-                              CustomListTile(
-                                  title: 'Transportation',
-                                  leading: Icon(
-                                    Icons.local_taxi,
+                        VerticalSpace(height: mediaQueryHeight * 0.04),
+                        Column(
+                          children: [
+                            IntrinsicHeight(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text('Income',
+                                      style: TextStyle(
+                                          fontWeight: bold,
+                                          fontSize: customFontSizeTitle)),
+                                  const VerticalDivider(
+                                    thickness: 1,
                                     color: Colors.black,
                                   ),
-                                  value: '- 15000'),
-                              CustomListTile(
-                                  title: 'Entertainment',
-                                  leading: Icon(
-                                    Icons.celebration_sharp,
-                                    color: Colors.orange,
+                                  Text('Expenses',
+                                      style: TextStyle(
+                                          fontWeight: bold,
+                                          fontSize: customFontSizeTitle)),
+                                  const VerticalDivider(
+                                      thickness: 1, color: Colors.black),
+                                  Text(
+                                    'Balance',
+                                    style: TextStyle(
+                                        fontWeight: bold,
+                                        fontSize: customFontSizeTitle),
                                   ),
-                                  value: '- 350000'),
-                              CustomListTile(
-                                  title: 'Debt Payments',
-                                  leading: Icon(
-                                    Icons.money_off_csred_sharp,
-                                    color: Colors.green,
+                                ],
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(
+                                  '₹$incomeAmount',
+                                  style: TextStyle(
+                                      fontWeight: bold,
+                                      fontSize: customFontSizeTitle,
+                                      color: greenTheme),
+                                ),
+                                const VerticalDivider(
+                                  thickness: 1,
+                                  color: Colors.black,
+                                ),
+                                Text(
+                                  '₹$expenseAmount',
+                                  style: TextStyle(
+                                      fontWeight: bold,
+                                      fontSize: customFontSizeTitle,
+                                      color: redTheme),
+                                ),
+                                const VerticalDivider(
+                                    thickness: 1, color: Colors.black),
+                                Text(
+                                  '₹${((incomeAmount) - (expenseAmount))}',
+                                  style: TextStyle(
+                                      fontWeight: bold,
+                                      fontSize: customFontSizeTitle,
+                                      color: blueTheme),
+                                ),
+                              ],
+                            ),
+                            VerticalSpace(height: mediaQueryHeight * 0.02),
+                            Container(
+                              width: double.maxFinite,
+                              height: mediaQueryHeight * 0.07,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.grey[200],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        left: mediaQueryWidth * 0.055),
+                                    child: myField,
                                   ),
-                                  value: '- 40000'),
-                              CustomListTile(
-                                  title: 'Personal Care',
-                                  leading: Icon(
-                                    Icons.emoji_emotions_outlined,
-                                    color: Colors.yellow,
-                                  ),
-                                  value: '- 30000'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        right: mediaQueryWidth * 0.03),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            if (myIcon.icon == Icons.search) {
+                                              myIcon = const Icon(Icons.clear);
+                                              myField = SizedBox(
+                                                width: mediaQueryWidth * 0.7,
+                                                height: mediaQueryHeight * 0.07,
+                                                child: TextField(
+                                                  onChanged: (value) {
+                                                    searchInput = value;
+                                                    setState(() {});
+                                                  },
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    border: InputBorder.none,
+                                                    hintText: 'Search here',
+                                                    hintStyle: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              setState(() {
+                                                searchInput = '';
+                                              });
+                                              myIcon = const Icon(Icons.search);
+                                              myField = const Text(
+                                                  'All Transactions');
+                                            }
+                                          });
+                                        },
+                                        icon: myIcon),
+                                  )
+                                ],
+                              ),
+                            ),
+                            ValueListenableBuilder(
+                              valueListenable: categories.listenable(),
+                              builder: (context, Box<Categories> cat, _) {
+                                final traList = boxList
+                                    .where((element) => element
+                                        .categoryType.category
+                                        .toLowerCase()
+                                        .contains(searchInput.toLowerCase()))
+                                    .toList();
+                                return traList.isEmpty
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                            top: mediaQueryHeight * 0.165),
+                                        child: const Text(
+                                            'No Transactions found :('),
+                                      )
+                                    : ListView.separated(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemBuilder: (context, index) {
+                                          return GestureDetector(
+                                            onLongPress: () => showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                    'Warning!',
+                                                    style: TextStyle(
+                                                        color: redTheme),
+                                                  ),
+                                                  content: const Text(
+                                                      'Do you want to delete?'),
+                                                  actions: [
+                                                    TextButton(
+                                                        child: const Text(
+                                                          'Yes',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black),
+                                                        ),
+                                                        onPressed: () {
+                                                          tra.delete(
+                                                              traList[index]
+                                                                  .key);
+                                                          Navigator.pop(
+                                                              context);
+                                                        }),
+                                                    TextButton(
+                                                      child: const Text(
+                                                        'NO',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context),
+                                                    )
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                            onTap:
+                                                traList[index].categoryType.type
+                                                    ? () => Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                IncomeScreen(
+                                                              currentKey:
+                                                                  traList[index]
+                                                                      .key,
+                                                            ),
+                                                          ),
+                                                        )
+                                                    : () => Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                ExpenseScreen(
+                                                              currentKey:
+                                                                  traList[index]
+                                                                      .key,
+                                                            ),
+                                                          ),
+                                                        ),
+                                            child: CustomTransactionCard(
+                                              color: traList[index]
+                                                      .categoryType
+                                                      .type
+                                                  ? greenTheme
+                                                  : redTheme,
+                                              amount:
+                                                  '₹${traList[index].amount}',
+                                              category: traList[index]
+                                                  .categoryType
+                                                  .category,
+                                              date: DateFormat('EEEE, d MMM')
+                                                  .format(
+                                                      traList[index].dateTime),
+                                            ),
+                                          );
+                                        },
+                                        itemCount: traList.length,
+                                        separatorBuilder: (context, index) {
+                                          return const SizedBox.shrink();
+                                        },
+                                      );
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
             ],
-          ),
-          Container(
-            width: double.maxFinite,
-            height: mediaQueryHeight * 0.25,
-            child: CustomCard(
-              dueDate: '05-12-2021',
-              circleAvatarText: 'KB',
-              title: 'Electricity bill',
-              payMent: 2000,
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  List<Data> getChartData() {
+  List<Data> getChartData(double totalIncome, double totalExpense) {
     final List<Data> chartData = [
-      Data('Income', 600000),
-      Data('Expense', 200000),
-      Data('Balance', 400000)
+      // Data('Income', 50000),
+      Data('Expense', totalIncome),
+      Data('Balance', totalExpense)
     ];
     return chartData;
   }
-
-  pickDateRange() async {
-    DateTimeRange? newDateRange = await showDateRangePicker(
-      context: context,
-      initialDateRange: dateRange,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2025),
-    );
-    if (newDateRange == null) return;
-    setState(() => dateRange = newDateRange);
-  }
-}
-
-class Data {
-  Data(this.datas, this.values);
-  final String datas;
-  final int values;
 }

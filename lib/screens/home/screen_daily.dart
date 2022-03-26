@@ -13,14 +13,10 @@ List<double> amountType(List<Transactions> list) {
   double incomeAmount = 0;
   double expenseAmount = 0;
   List<double> amountList = [];
-  // print(list.length);
+
   for (int i = 0; i < list.length; i++) {
-    // print(list[i].amount);
-    // print(list[i].categoryType.type);
     if (list[i].categoryType.type == true) {
-      // print(list[i].amount);
       incomeAmount += list[i].amount;
-      // print(incomeAmount);
     } else {
       expenseAmount += list[i].amount;
     }
@@ -38,7 +34,6 @@ class DailyScreen extends StatefulWidget {
 }
 
 class _DailyScreenState extends State<DailyScreen> {
-  //  List<Data> _chartData ;
   late Box<Categories> categories;
   late Box<Transactions> transactions;
   late Box<ReminderDb> reminder;
@@ -51,7 +46,6 @@ class _DailyScreenState extends State<DailyScreen> {
     categories = Hive.box<Categories>(categoryBox);
     transactions = Hive.box<Transactions>(transactionBox);
     reminder = Hive.box<ReminderDb>(reminderBox);
-    // _chartData = getChartData();
     super.initState();
   }
 
@@ -60,14 +54,13 @@ class _DailyScreenState extends State<DailyScreen> {
     double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
     return SingleChildScrollView(
-      // physics: const NeverScrollableScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       child: ValueListenableBuilder(
         valueListenable: transactions.listenable(),
         builder: (context, Box<Transactions> tra, _) {
           List<Transactions> boxList = tra.values.toList();
           double incomeAmount = amountType(boxList)[0];
           double expenseAmount = amountType(boxList)[1];
-          // print(incomeAmount);
           return boxList.isEmpty
               ? Padding(
                   padding: EdgeInsets.only(top: mediaQueryHeight * 0.4),
@@ -79,7 +72,7 @@ class _DailyScreenState extends State<DailyScreen> {
                 )
               : Column(
                   children: [
-                    Container(
+                    SizedBox(
                       height: mediaQueryHeight * 0.35,
                       width: double.maxFinite,
                       child: Padding(
@@ -102,8 +95,6 @@ class _DailyScreenState extends State<DailyScreen> {
                           ),
                           series: <CircularSeries>[
                             DoughnutSeries<Data, String>(
-                              // startAngle: 100,
-                              // endAngle: 10,
                               radius: '90',
                               innerRadius: '60',
                               dataSource: getChartData(
@@ -207,17 +198,6 @@ class _DailyScreenState extends State<DailyScreen> {
                                       right: mediaQueryWidth * 0.025),
                                   child: Column(
                                     children: [
-                                      // const Text('Today'),
-                                      // HorizontalSpace(width: mediaQueryWidth * 0.24),
-                                      // Text(
-                                      //   'Income',
-                                      //   style: TextStyle(color: greenTheme),
-                                      // ),
-                                      // HorizontalSpace(width: mediaQueryWidth * 0.19),
-                                      // Text(
-                                      //   'Expense',
-                                      //   style: TextStyle(color: redTheme),
-                                      // ),
                                       ValueListenableBuilder(
                                         valueListenable: reminder.listenable(),
                                         builder: (context,
@@ -250,10 +230,11 @@ class _DailyScreenState extends State<DailyScreen> {
                                                         builder: (context) {
                                                           return AlertDialog(
                                                             title: Text(
-                                                                'Warning!',
-                                                                style: TextStyle(
-                                                                    color:
-                                                                        redTheme)),
+                                                              'Warning!',
+                                                              style: TextStyle(
+                                                                  color:
+                                                                      redTheme),
+                                                            ),
                                                             content: const Text(
                                                                 'Do you want to delete?'),
                                                             actions: [
@@ -336,59 +317,6 @@ class _DailyScreenState extends State<DailyScreen> {
                                     ],
                                   ),
                                 ),
-                                // const Divider(
-                                //   thickness: 1,
-                                //   color: Colors.black,
-                                // ),
-                                // Row(
-                                //   children: [
-                                //     HorizontalSpace(width: mediaQueryWidth * 0.395),
-                                //     Text(
-                                //       '2000',
-                                //       style: TextStyle(color: greenTheme),
-                                //     ),
-                                //     HorizontalSpace(width: mediaQueryWidth * 0.24),
-                                //     Text(
-                                //       '1000',
-                                //       style: TextStyle(color: redTheme),
-                                //     ),
-                                //   ],
-                                // ),
-                                // Card(
-                                //   child: Theme(
-                                //     data: ThemeData(dividerColor: Colors.transparent),
-                                //     child: ExpansionTile(
-                                //       title: Text(
-                                //         'Details',
-                                //         style: TextStyle(
-                                //             color: Colors.black, fontFamily: 'Prompt'),
-                                //       ),
-                                //       children: [
-                                //         CustomListTile(
-                                //             title: 'Shopping',
-                                //             leading: Icon(
-                                //               Icons.shopping_cart,
-                                //               color: Colors.blue,
-                                //             ),
-                                //             value: '- 400'),
-                                //         CustomListTile(
-                                //             title: 'Food and Drinks',
-                                //             leading: Icon(
-                                //               Icons.local_restaurant_outlined,
-                                //               color: Colors.red,
-                                //             ),
-                                //             value: '- 300'),
-                                //         CustomListTile(
-                                //             title: 'Transportation',
-                                //             leading: Icon(
-                                //               Icons.local_taxi,
-                                //               color: Colors.black,
-                                //             ),
-                                //             value: '- 300'),
-                                //       ],
-                                //     ),
-                                //   ),
-                                // ),
                               ],
                             ),
                           ),
@@ -418,8 +346,8 @@ class _DailyScreenState extends State<DailyScreen> {
                                       setState(() {
                                         if (myIcon.icon == Icons.search) {
                                           myIcon = const Icon(Icons.clear);
-                                          myField = Container(
-                                            width: double.maxFinite,
+                                          myField = SizedBox(
+                                            width: mediaQueryWidth * 0.7,
                                             height: mediaQueryHeight * 0.07,
                                             child: TextField(
                                               onChanged: (value) {
@@ -427,20 +355,12 @@ class _DailyScreenState extends State<DailyScreen> {
                                                 setState(() {});
                                               },
                                               decoration: const InputDecoration(
-                                                enabledBorder:
-                                                    UnderlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                            color:
-                                                                Colors.black)),
-                                                focusedBorder:
-                                                    UnderlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: Colors.white),
-                                                ),
+                                                border: InputBorder.none,
                                                 hintText: 'Search here',
                                                 hintStyle: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14),
+                                                  color: Colors.black,
+                                                  fontSize: 14,
+                                                ),
                                               ),
                                             ),
                                           );
@@ -462,7 +382,6 @@ class _DailyScreenState extends State<DailyScreen> {
                         ValueListenableBuilder(
                           valueListenable: categories.listenable(),
                           builder: (context, Box<Categories> cat, _) {
-                            // final catList = cat.values.toList();
                             final traList = tra.values
                                 .toList()
                                 .where((element) => element
@@ -470,6 +389,8 @@ class _DailyScreenState extends State<DailyScreen> {
                                     .toLowerCase()
                                     .contains(searchInput.toLowerCase()))
                                 .toList();
+                            traList.sort((first, second) =>
+                                second.dateTime.compareTo(first.dateTime));
                             return traList.isEmpty
                                 ? Padding(
                                     padding: EdgeInsets.only(
@@ -562,31 +483,6 @@ class _DailyScreenState extends State<DailyScreen> {
                           },
                         ),
                       ],
-                      // ),
-                      // ListView.separated(
-                      //   physics: NeverScrollableScrollPhysics(),
-                      //   shrinkWrap: true,
-                      //   itemBuilder: (context, index) {
-                      //     return CustomTransactionCard(
-                      //       amount: values[index].amount.toString(),
-                      //       category: values[index].categories.expenseCategory,
-                      //       date: values[index].dateTime.toString(),
-                      //     );
-                      //   },
-                      //   itemCount: values.length,
-                      //   separatorBuilder: (context, index) {
-                      //     return Divider();
-                      //   },
-                      // ),
-                      // Container(
-                      //   width: double.maxFinite,
-                      //   height: mediaQueryHeight * 0.30,
-                      //   child: CustomCard(
-                      //     dueDate: '05-12-2021',
-                      //     circleAvatarText: 'KB',
-                      //     title: 'Electricity bill',
-                      //     payMent: 2000,
-                      //   ),
                     )
                   ],
                 );
@@ -597,7 +493,6 @@ class _DailyScreenState extends State<DailyScreen> {
 
   List<Data> getChartData(double income, double expense) {
     final List<Data> chartData = [
-      // Data('Income', 2000),
       Data('Expense', income),
       Data('Balance', expense)
     ];

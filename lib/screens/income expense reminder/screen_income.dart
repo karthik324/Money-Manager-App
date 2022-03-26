@@ -6,6 +6,7 @@ import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/screens/categories/screen_income_categories.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 
+// ignore: must_be_immutable
 class IncomeScreen extends StatefulWidget {
   int? currentKey;
   IncomeScreen({Key? key, this.currentKey}) : super(key: key);
@@ -18,13 +19,10 @@ class _IncomeScreenState extends State<IncomeScreen> {
   final formKey = GlobalKey<FormState>();
   Categories? selectedCategory;
   TextEditingController amountController = TextEditingController();
-  // final newDate = DateTime.now();
   late Box<Categories> categories;
   late Box<Transactions> transactions;
   bool redCol = false;
   DateTime? date;
-  // ExpenseCategories? selectedVal;
-  // String name = '';
 
   @override
   void initState() {
@@ -120,7 +118,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
               ),
             ),
             CustomSubHead(text: 'Date'),
-            Container(
+            SizedBox(
               height: mediaQueryHeight * 0.04,
               child: Row(
                 children: [
@@ -191,7 +189,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
                   widget.currentKey == null
                       ? transactions.add(newTransaction)
                       : transactions.put(widget.currentKey, newTransaction);
-                  // print(newTransaction);
+
                   Navigator.pop(context);
                 }
               },

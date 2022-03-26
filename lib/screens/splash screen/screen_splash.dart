@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:money_manager_app/main.dart';
-import 'package:money_manager_app/screens/login/screen_login.dart';
+import 'package:money_manager_app/screens/home/screen_home.dart';
 import 'package:money_manager_app/screens/onboarding/screen_onboardings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,31 +14,20 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   int? initScreen;
-  String finalName = '';
+  int? initScreenLogin;
   @override
   initState() {
     super.initState();
-    // getValidationData();
-    // Timer(
-    //     Duration(seconds: 3),
-    //     () => Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(
-    //             builder: (context) =>
-    //                 finalName == null ? LoginScreen() : HomeScreen())));
     onboardingOrLogin();
-    // SharedPreferences preferences = await SharedPreferences.getInstance();
-    // initScreen = await preferences.getInt('initScreen');
-    // await preferences.setInt('initScreen', 1);
+    onboardingOrHome();
     Timer(
       const Duration(seconds: 3),
       () => Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: ((context) => initScreen == 0 || initScreen == null
-              ? const OnboardingScreen1()
-              : const LoginScreen()),
-        ),
+            builder: (context) => initScreen == null && initScreenLogin == null
+                ? const OnboardingScreen1()
+                : const HomeScreen()),
       ),
     );
   }
@@ -47,6 +36,12 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     initScreen = preferences.getInt('initScreen');
     await preferences.setInt('initScreen', 1);
+  }
+
+  onboardingOrHome() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    initScreenLogin = preferences.getInt('initScreenLogin');
+    await preferences.setInt('initScreenLogin', 1);
   }
 
   @override

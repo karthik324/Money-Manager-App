@@ -22,7 +22,6 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
 
   @override
   Widget build(BuildContext context) {
-    // double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +37,7 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
           return catgoriesList.isEmpty
               ? const Center(child: Text('Add some Categories'))
               : ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: const BouncingScrollPhysics(),
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
                     return Padding(
@@ -49,7 +48,6 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
                         child: ListTile(
-                          // tileColor: Color.fromARGB(255, 214, 146, 141),
                           title: Text(catgoriesList[index].category),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,

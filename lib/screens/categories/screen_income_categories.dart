@@ -35,9 +35,7 @@ class _IncomeCategoryState extends State<IncomeCategory> {
 
   @override
   Widget build(BuildContext context) {
-    // double mediaQueryHeight = MediaQuery.of(context).size.height;
     double mediaQueryWidth = MediaQuery.of(context).size.width;
-    // List<ExpenseCategories> category = box.values.toList();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: greenTheme,
@@ -54,7 +52,7 @@ class _IncomeCategoryState extends State<IncomeCategory> {
                     child: Text('Add some Categories'),
                   )
                 : ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       return Padding(
@@ -201,7 +199,6 @@ class _IncomeCategoryState extends State<IncomeCategory> {
                         } else {
                           categories.put(key, newCategory);
                         }
-                        // print(newCategory);
                         Navigator.pop(context);
                       }
                     }
