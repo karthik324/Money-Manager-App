@@ -4,7 +4,7 @@ My first fully functional Money Manager App with local database Hive.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Privacy Policy - https://www.freeprivacypolicy.com/live/cd781538-d5d8-46e4-bfe1-2cc49b2791c4
 
 A few resources to get you started if this is your first Flutter project:
 
