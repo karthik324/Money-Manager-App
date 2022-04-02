@@ -177,7 +177,7 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
                   ),
                   backgroundColor: MaterialStateProperty.all(redTheme),
                 ),
-                child: const Text('Add'),
+                child: key == null ? const Text('Add') : const Text('Update'),
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
                     if (controller.text != '') {

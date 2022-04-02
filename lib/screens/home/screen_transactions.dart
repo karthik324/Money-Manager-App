@@ -26,14 +26,14 @@ List<double> amountType(List<Transactions> list) {
   return amountList;
 }
 
-class DailyScreen extends StatefulWidget {
-  const DailyScreen({Key? key}) : super(key: key);
+class AllTransactions extends StatefulWidget {
+  const AllTransactions({Key? key}) : super(key: key);
 
   @override
-  State<DailyScreen> createState() => _DailyScreenState();
+  State<AllTransactions> createState() => _AllTransactionsState();
 }
 
-class _DailyScreenState extends State<DailyScreen> {
+class _AllTransactionsState extends State<AllTransactions> {
   late Box<Categories> categories;
   late Box<Transactions> transactions;
   late Box<ReminderDb> reminder;
@@ -118,6 +118,8 @@ class _DailyScreenState extends State<DailyScreen> {
                     ),
                     VerticalSpace(height: mediaQueryHeight * 0.04),
                     Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         IntrinsicHeight(
                           child: Row(

@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
-import 'package:money_manager_app/screens/home/screen_daily.dart';
+import 'package:money_manager_app/screens/home/screen_transactions.dart';
 import 'package:money_manager_app/screens/income%20expense%20reminder/screen_expense.dart';
 import 'package:money_manager_app/screens/income%20expense%20reminder/screen_income.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
@@ -139,6 +139,8 @@ class _YearlyScreenState extends State<YearlyScreen> {
                         ),
                         VerticalSpace(height: mediaQueryHeight * 0.04),
                         Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             IntrinsicHeight(
                               child: Row(

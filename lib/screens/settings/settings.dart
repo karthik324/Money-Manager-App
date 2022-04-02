@@ -5,6 +5,8 @@ import 'package:money_manager_app/db/database.dart';
 import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:store_redirect/store_redirect.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -91,7 +93,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           GestureDetector(
             onTap: () => Share.share(
-                'You should definitely check this app out. Such a simple and cool Money Manager App.'),
+              'You should definitely check this app out. Such a simple and cool Money Manager App.\n https://play.google.com/store/apps/details?id=in.brototype.money_manager_app',
+            ),
             child: ListTile(
               leading: Icon(
                 Icons.share,
@@ -100,19 +103,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: const Text('Share App'),
             ),
           ),
-          ListTile(
-            leading: Icon(
-              Icons.star,
-              color: greenTheme,
+          GestureDetector(
+            onTap: () {
+              StoreRedirect.redirect(
+                androidAppId: 'in.brototype.money_manager_app',
+              );
+            },
+            child: ListTile(
+              leading: Icon(
+                Icons.star,
+                color: greenTheme,
+              ),
+              title: const Text('Rate App'),
             ),
-            title: const Text('Rate App'),
           ),
-          ListTile(
-            leading: Icon(
-              Icons.privacy_tip,
-              color: greenTheme,
+          GestureDetector(
+            onTap: () {
+              Utils.openLink(
+                  url:
+                      'https://www.freeprivacypolicy.com/live/cd781538-d5d8-46e4-bfe1-2cc49b2791c4');
+            },
+            child: ListTile(
+              leading: Icon(
+                Icons.privacy_tip,
+                color: greenTheme,
+              ),
+              title: const Text('Privacy Policy'),
             ),
-            title: const Text('Privacy Policy'),
           ),
           GestureDetector(
             onTap: (() => Utils.openLink(

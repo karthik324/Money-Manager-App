@@ -72,7 +72,7 @@ class CustomInputField extends StatelessWidget {
       padding: EdgeInsets.only(
           left: mediaQueryHeight * 0.02, right: mediaQueryHeight * 0.02),
       child: TextFormField(
-          keyboardType: TextInputType.name,
+          textCapitalization: TextCapitalization.words,
           onChanged: onChanged,
           controller: controller,
           decoration: InputDecoration(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/screens/home/screen_calander.dart';
-import 'package:money_manager_app/screens/home/screen_daily.dart';
+import 'package:money_manager_app/screens/home/screen_transactions.dart';
 import 'package:money_manager_app/screens/income expense reminder/screen_expense.dart';
 import 'package:money_manager_app/screens/income expense reminder/screen_income.dart';
 import 'package:money_manager_app/screens/home/screen_monthly.dart';
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: TabBarView(
                 controller: _tabController,
                 children: const [
-                  DailyScreen(),
+                  AllTransactions(),
                   MonthlyScreen(),
                   YearlyScreen(),
                   CalanderScreen()

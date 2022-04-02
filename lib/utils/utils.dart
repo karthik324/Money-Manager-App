@@ -16,4 +16,6 @@ class Utils {
   }
 
   static Future openLink({required String url}) => _launchUrl(url);
+
+
 }

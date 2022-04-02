@@ -38,6 +38,7 @@ dependencies:
   intl: 0.17.0
   share_plus: 4.0.2
   shared_preferences: 2.0.13
+  store_redirect: 2.0.1
   syncfusion_flutter_charts: 19.4.54
   url_launcher: 6.0.20
 
