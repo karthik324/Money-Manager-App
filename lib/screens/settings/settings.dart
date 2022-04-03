@@ -6,7 +6,6 @@ import 'package:money_manager_app/main.dart';
 import 'package:money_manager_app/widgets/custom_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:store_redirect/store_redirect.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);

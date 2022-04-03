@@ -493,10 +493,10 @@ class _AllTransactionsState extends State<AllTransactions> {
     );
   }
 
-  List<Data> getChartData(double income, double expense) {
+  List<Data> getChartData(double expense, double balance) {
     final List<Data> chartData = [
-      Data('Expense', income),
-      Data('Balance', expense)
+      Data('Expense', expense),
+      Data('Balance', balance)
     ];
     return chartData;
   }

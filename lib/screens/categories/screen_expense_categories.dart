@@ -14,10 +14,26 @@ class ExpenseCategory extends StatefulWidget {
 
 class _ExpenseCategoryState extends State<ExpenseCategory> {
   late Box<Categories> categories;
+  late Box<Transactions> transactions;
   @override
   void initState() {
     categories = Hive.box<Categories>(categoryBox);
+    transactions = Hive.box<Transactions>(transactionBox);
     super.initState();
+  }
+
+  bool duplicateorNot(List<Categories> list, String value) {
+    int count = 0;
+    for (int i = 0; i < list.length; i++) {
+      if (list[i].category.trim() == value.trim()) {
+        count++;
+      }
+    }
+    if (count == 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -72,8 +88,10 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
                                     context: context,
                                     builder: (context) {
                                       return AlertDialog(
-                                        title: Text('Warning!',
-                                            style: TextStyle(color: redTheme)),
+                                        title: Text(
+                                          'Warning!',
+                                          style: TextStyle(color: redTheme),
+                                        ),
                                         content: const Text(
                                             'Do you want to delete?'),
                                         actions: [
@@ -84,6 +102,22 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
                                                   color: Colors.black),
                                             ),
                                             onPressed: () {
+                                              List<Transactions>
+                                                  transactionsList =
+                                                  transactions.values.toList();
+                                              List<Categories> categoriesList =
+                                                  categories.values.toList();
+                                              for (int i = 0;
+                                                  i < transactions.length;
+                                                  i++) {
+                                                if (transactionsList[i]
+                                                        .categoryType
+                                                        .category ==
+                                                    categoriesList[index]
+                                                        .category) {
+                                                  transactionsList[i].delete();
+                                                }
+                                              }
                                               categories.delete(
                                                   catgoriesList[index].key);
                                               Navigator.pop(context);
@@ -179,10 +213,13 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
                 ),
                 child: key == null ? const Text('Add') : const Text('Update'),
                 onPressed: () {
-                  if (formKey.currentState!.validate()) {
+                  List<Categories> categoriesList = categories.values.toList();
+                  if (formKey.currentState!.validate() &&
+                      duplicateorNot(categoriesList, controller.text)) {
                     if (controller.text != '') {
                       Categories newCategory =
                           Categories(category: controller.text, type: false);
+
                       if (key == null) {
                         categories.add(newCategory);
                       } else {
