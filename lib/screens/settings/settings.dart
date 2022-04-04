@@ -143,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           VerticalSpace(height: mediaQueryHeight * 0.33),
           const Text(
-            'Version 1.0',
+            'Version 1.1',
             style: TextStyle(color: Colors.grey),
           )
         ],
