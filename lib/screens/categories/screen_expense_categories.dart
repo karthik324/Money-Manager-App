@@ -102,22 +102,6 @@ class _ExpenseCategoryState extends State<ExpenseCategory> {
                                                   color: Colors.black),
                                             ),
                                             onPressed: () {
-                                              List<Transactions>
-                                                  transactionsList =
-                                                  transactions.values.toList();
-                                              List<Categories> categoriesList =
-                                                  categories.values.toList();
-                                              for (int i = 0;
-                                                  i < transactions.length;
-                                                  i++) {
-                                                if (transactionsList[i]
-                                                        .categoryType
-                                                        .category ==
-                                                    categoriesList[index]
-                                                        .category) {
-                                                  transactionsList[i].delete();
-                                                }
-                                              }
                                               categories.delete(
                                                   catgoriesList[index].key);
                                               Navigator.pop(context);
